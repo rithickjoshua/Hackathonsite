@@ -28,14 +28,6 @@ const RegistrationForm = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setTeamMember({
-      ...teamMember,
-      [name]: value,
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -43,11 +35,23 @@ const RegistrationForm = () => {
     const apiUrl = "https://web-it-like-spider.onrender.com/hackathon/register/";
 
     try {
-      // Make an HTTP POST request to the API
-      const response = await Axios.post(apiUrl, {
+      // Create an array to hold the team members' data in the specified format
+      const teamMemberData = teamMembers.map((member, index) => ({
+        [`team_member_${index + 1}_name`]: member.name,
+        [`team_member_${index + 1}_department`]: member.department,
+        [`team_member_${index + 1}_phone`]: member.phoneNumber,
+        [`team_member_${index + 1}_email`]: member.email,
+        [`team_member_${index + 1}_register_number`]: member.registerNumber,
+      }));
+
+      // Combine the team members' data into a single object
+      const teamData = {
         team_name: teamName,
-        team_members: teamMembers,
-      });
+        ...Object.assign({}, ...teamMemberData),
+      };
+
+      // Make an HTTP POST request to the API with the combined data
+      const response = await Axios.post(apiUrl, teamData);
       console.log("API Response:", response.data);
 
       // Reset the form fields
@@ -91,7 +95,7 @@ const RegistrationForm = () => {
                     placeholder="Name"
                     name="name"
                     value={teamMember.name}
-                    onChange={handleInputChange}
+                    onChange={(e) => setTeamMember({ ...teamMember, name: e.target.value })}
                     required
                   />
                   <input
@@ -99,7 +103,7 @@ const RegistrationForm = () => {
                     placeholder="Department"
                     name="department"
                     value={teamMember.department}
-                    onChange={handleInputChange}
+                    onChange={(e) => setTeamMember({ ...teamMember, department: e.target.value })}
                     required
                   />
                   <input
@@ -107,7 +111,7 @@ const RegistrationForm = () => {
                     placeholder="Phone Number"
                     name="phoneNumber"
                     value={teamMember.phoneNumber}
-                    onChange={handleInputChange}
+                    onChange={(e) => setTeamMember({ ...teamMember, phoneNumber: e.target.value })}
                     required
                   />
                   <input
@@ -115,7 +119,7 @@ const RegistrationForm = () => {
                     placeholder="Email ID"
                     name="email"
                     value={teamMember.email}
-                    onChange={handleInputChange}
+                    onChange={(e) => setTeamMember({ ...teamMember, email: e.target.value })}
                     required
                   />
                   <input
@@ -123,7 +127,7 @@ const RegistrationForm = () => {
                     placeholder="Register Number"
                     name="registerNumber"
                     value={teamMember.registerNumber}
-                    onChange={handleInputChange}
+                    onChange={(e) => setTeamMember({ ...teamMember, registerNumber: e.target.value })}
                     required
                   />
                   <br />
