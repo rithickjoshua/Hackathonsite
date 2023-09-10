@@ -1,29 +1,29 @@
 import React, { useState } from "react";
+import Axios from "axios";
 
 const RegistrationForm = () => {
-  const [lonewolf, setLonewolf] = useState(true);
   const [teamMembers, setTeamMembers] = useState([]);
   const [teamMember, setTeamMember] = useState({
     name: "",
+    department: "",
     phoneNumber: "",
-    graduationYear: "",
     email: "",
+    registerNumber: "",
   });
   const [teamName, setTeamName] = useState("");
   const [showForm, setShowForm] = useState(true);
-
-  const toggleSection = () => {
-    setLonewolf(!lonewolf);
-  };
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const addTeamMember = () => {
-    if (teamMembers.length < 4 && teamMember.name.trim() !== "") {
+    if (teamMembers.length < 3 && teamMember.name.trim() !== "") {
       setTeamMembers([...teamMembers, teamMember]);
       setTeamMember({
         name: "",
+        department: "",
         phoneNumber: "",
-        graduationYear: "",
         email: "",
+        registerNumber: "",
       });
     }
   };
@@ -36,98 +36,47 @@ const RegistrationForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Process the form data here based on lonewolf or team selection
-    if (lonewolf) {
-      // Process lone wolf data in formData
-      console.log("Lone Wolf Data:", teamMember);
-    } else {
-      // Process team data in teamMembers array
-      console.log("Team Data:", teamMembers);
-      console.log("Team Name:", teamName);
-    }
-    // Reset the form fields
-    setTeamMembers([]);
-    setTeamMember({
-      name: "",
-      phoneNumber: "",
-      graduationYear: "",
-      email: "",
-    });
-    setTeamName("");
 
-    // Close the registration form
-    setShowForm(false);
+    // Assuming the API URL for POST request
+    const apiUrl = "https://web-it-like-spider.onrender.com/hackathon/register/";
+
+    try {
+      // Make an HTTP POST request to the API
+      const response = await Axios.post(apiUrl, {
+        team_name: teamName,
+        team_members: teamMembers,
+      });
+      console.log("API Response:", response.data);
+
+      // Reset the form fields
+      setTeamMembers([]);
+      setTeamName("");
+
+      // Show success message
+      setSuccess(true);
+      setError(null);
+    } catch (error) {
+      console.error("API Error:", error);
+
+      // Show error message
+      setError("An error occurred. Please try again later.");
+      setSuccess(false);
+    }
   };
 
   return (
     <div className="registration-form">
       {showForm ? (
         <>
-          <button onClick={toggleSection} className={`option-button ${lonewolf ? "selected" : ""}`}>
-            Lone Wolf
-          </button>
-          {'\t'}
-          <span className="divider">/</span>
-          {'\t'}
-          <button onClick={toggleSection} className={`option-button ${!lonewolf ? "selected" : ""}`}>
-            Team
-          </button>
-          
-          {lonewolf ? (
-            <div className="lonewolf-section">
-              <h3>Lone Wolf Registration</h3>
-              <button className="close-button" onClick={() => setShowForm(false)}>
-                &times;
-              </button>
-              <form onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Name"
-                  value={teamMember.name}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  placeholder="Phone Number"
-                  value={teamMember.phoneNumber}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  type="text"
-                  name="graduationYear"
-                  placeholder="Graduation year eg. 2025"
-                  value={teamMember.graduationYear}
-                  onChange={handleInputChange}
-                  required
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email ID"
-                  value={teamMember.email}
-                  onChange={handleInputChange}
-                  required
-                />
-                <div className="register-button-container">
-                  <button type="submit">Register</button>
-                </div>
-              </form>
-            </div>
-          ) : (
-            <div className="team-section">
-              <h3>Team Registration</h3>
-              <button className="close-button" onClick={() => setShowForm(false)}>
-                &times;
-              </button>
-              <p className="team-instructions">
-                Team capacity must be 4
-              </p>
+          <div className="team-section">
+            <h3>Team Registration</h3>
+            <button className="close-button" onClick={() => setShowForm(false)}>
+              &times;
+            </button>
+            <p className="team-instructions">Team capacity must be 3</p>
+            <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 placeholder="Team Name"
@@ -135,13 +84,21 @@ const RegistrationForm = () => {
                 onChange={(e) => setTeamName(e.target.value)}
                 required
               />
-              {teamMembers.length < 4 && (
+              {teamMembers.length < 3 && (
                 <div className="team-member-form">
                   <input
                     type="text"
                     placeholder="Name"
                     name="name"
                     value={teamMember.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Department"
+                    name="department"
+                    value={teamMember.department}
                     onChange={handleInputChange}
                     required
                   />
@@ -154,14 +111,6 @@ const RegistrationForm = () => {
                     required
                   />
                   <input
-                    type="text"
-                    placeholder="Graduation Year eg. 2025"
-                    name="graduationYear"
-                    value={teamMember.graduationYear}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  <input
                     type="email"
                     placeholder="Email ID"
                     name="email"
@@ -169,7 +118,15 @@ const RegistrationForm = () => {
                     onChange={handleInputChange}
                     required
                   />
-                  <br></br>
+                  <input
+                    type="text"
+                    placeholder="Register Number"
+                    name="registerNumber"
+                    value={teamMember.registerNumber}
+                    onChange={handleInputChange}
+                    required
+                  />
+                  <br />
                   <button onClick={addTeamMember}>Add Team Member</button>
                 </div>
               )}
@@ -180,17 +137,21 @@ const RegistrationForm = () => {
                   </li>
                 ))}
               </ul>
-              {teamMembers.length === 4 && (
+              {teamMembers.length === 3 && (
                 <div className="register-button-container">
-                  <button type="submit" onClick={handleSubmit}>Register</button>
+                  <button type="submit">Register</button>
                 </div>
               )}
-            </div>
-          )}
+            </form>
+          </div>
         </>
       ) : (
         <div className="registration-closed">
-          <p>Thank you for registering!</p>
+          {success ? (
+            <p>Thank you for registering!</p>
+          ) : (
+            <p>{error || "An error occurred."}</p>
+          )}
         </div>
       )}
     </div>
